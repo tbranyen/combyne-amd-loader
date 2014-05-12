@@ -1,0 +1,14 @@
+{
+  "name": "combyne-amd-loader",
+  "version": "0.1.0",
+  "main": "loader.js",
+  "dependencies": {
+    "combyne": "*"
+  },
+  "devDependencies": {
+    "qunit": "~1.12.0",
+    "requirejs": "~2.1.8",
+    "curl": "~0.8.2",
+    "dojo": "~1.9.1"
+  }
+}

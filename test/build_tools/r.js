@@ -1,0 +1,1 @@
+require(["tmpl!fixtures/basic"]);
