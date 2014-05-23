@@ -18,7 +18,7 @@ AMD, will advocate the use of the RequireJS text! plugin.  While this is a fine
 tool for loading text, it is not optimized for templates.  It requires the
 duplicative act of compiling the templates before use in production.
 
-### Installing: ###
+### Installing. ###
 
 This plugin has been registered with Bower, install with:
 
@@ -29,7 +29,7 @@ bower install combyne-amd-loader
 Alternatively you can download the `loader.js` file and place anywhere in your
 project.
 
-### Loading the plugin: ###
+### Loading the plugin. ###
 
 ``` javascript
 require.config({
@@ -47,7 +47,7 @@ Examples:
 * `vendor/libraries/loader`
 * `http://cdn.mysite.com/vendor/libraries/loader.js`
 
-### Using: ###
+### Using. ###
 
 Inside an AMD module you can now load templates like so:
 
@@ -63,7 +63,7 @@ define(["tmpl!path/to/template"], function(template) {
 The path to your templates directory can be configured as well as the default
 extension to search for.  More details below.
 
-### Configuring templateSettings: ###
+### Configuring templateSettings. ###
 
 There are a few default settings in place to make consumption easier.
 
@@ -90,7 +90,61 @@ require.config({
 });
 ```
 
-### Using with Dojo: ###
+### Working with filters. ###
+
+It's recommended to separate your filters into separate files and require them
+where needed.  A good organization structure is the following:
+
+``` javascript
+define(function(require, exports, module) {
+  "use strict";
+
+  var myTemplate = require("tmpl!./template");
+  var uppercaseFilter = require("../filters/uppercase");
+
+  // Register the filter to the template.
+  myTemplate.registerFilter("uppercase", uppercaseFilter);
+});
+```
+
+If you wanted to keep all filters together in a single file and export them
+that'd be a good way to structure as well.
+
+### Working with partials. ###
+
+Partials are interesting as well to work with, as they are not bundled with
+the template.
+
+``` javascript
+define(function(require, exports, module) {
+  "use strict";
+
+  var layout = require("tmpl!./layout");
+  var child = require("tmpl!./partial");
+
+  // Render the Combyne template as a partial for {%partial inner%}.
+  layout.registerPartial("inner", child);
+});
+```
+
+This allows means you can very easily mix template engines.
+
+``` javascript
+define(function(require, exports, module) {
+  "use strict";
+
+  var layout = require("tmpl!./layout");
+  var handlebars = require("hbs!./partial");
+
+  // Render the Handlebars template wherever {%partial hbs%} is inside the
+  // layout.
+  layout.registerPartial("hbs", {
+    render: handlebars
+  });
+});
+```
+
+### Using with Dojo. ###
 
 Ensure Dojo's loader is in `async` mode:
 
@@ -118,7 +172,7 @@ require(["tmpl!path/to/template"], function(template) {
 });
 ```
 
-### Using with Curl: ###
+### Using with Curl. ###
 
 Set up your configuration:
 
@@ -140,7 +194,7 @@ curl(["tmpl!path/to/template"], function(template) {
 });
 ```
 
-### Running tests ###
+### Running tests. ###
 
 You will need Node.js and Grunt installed to run tests.
 
@@ -149,7 +203,7 @@ commands:
 
 ``` bash
 # Install dependencies.
-npm i -q
+npm install
 
 # Run the tests.
 grunt
@@ -158,9 +212,9 @@ grunt
 You can also run an http-server in the root and hit the tests directly.  Since
 XHR is used, tests must be run from a server.
 
-### Release notes: ###
+### Release notes. ###
 
-#### 0.1.0 ####
+#### 0.1.0: ####
 
 * Open sourced on GitHub.
 * Borrowed heavily from lodash-template-loader.
