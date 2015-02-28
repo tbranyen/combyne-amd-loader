@@ -214,6 +214,10 @@ XHR is used, tests must be run from a server.
 
 ### Release notes. ###
 
+#### 0.1.1: ####
+
+* Fixed NPM dependencies, removed bower requirement
+
 #### 0.1.0: ####
 
 * Open sourced on GitHub.

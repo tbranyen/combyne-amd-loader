@@ -1,4 +1,4 @@
-/* 
+/*
  * Test Module: RequireJS
  * Ensures that the loader loads and functions in RequireJS.
  *
@@ -9,7 +9,7 @@ require.config({
   baseUrl: "/test",
 
   paths: {
-    combyne: "../bower_components/combyne/dist/combyne",
+    combyne: "../node_modules/combyne/dist/combyne",
     tmpl: "../loader"
   }
 });
