@@ -5,6 +5,44 @@
 (function(global) {
 "use strict";
 
+var extendsCache = {};
+
+/**
+ * Recursively traverses nodes returning those passing the truth function.
+ *
+ * @private
+ * @param {Array} nodes
+ * @param {Function} test
+ * @returns {Array} An array of nodes.
+ */
+function recurse(nodes, test) {
+  var memo = [];
+
+  if (!nodes) {
+    return memo;
+  }
+
+  nodes.forEach(function(node) {
+    if (!node) {
+      return;
+    }
+
+    if (test(node)) {
+      memo.push(node);
+    }
+
+    if (node.conditions) {
+      memo.push.apply(memo, recurse(node.conditions.map(function(node) {
+        return node.value;
+      }), test, memo));
+    }
+
+    memo.push.apply(memo, recurse(node.nodes, test, memo));
+  });
+
+  return memo;
+}
+
 // Cache used to map configuration options between load and write.
 var buildMap = {};
 
@@ -22,6 +60,8 @@ define(function(require, exports) {
   exports.load = function(name, req, load, config) {
     var isDojo;
 
+    var nName = name;
+
     // Dojo provides access to the config object through the req function.
     if (!config) {
       config = require.rawConfig;
@@ -30,7 +70,17 @@ define(function(require, exports) {
 
     var contents = "";
     var settings = configure(config);
-    var prefix = isDojo ? "/" : "";
+
+    // Mimic how the actual Combyne stores.
+    settings._filters = {};
+    settings._partials = {};
+
+    // Only use root if baseUrl and root differ: toUrl() will choke on
+    // virtual path config
+    var root = settings.root.replace(/(\/$)/,'') !==
+               config.baseUrl.replace(/(\/$)/,'') ? settings.root:'';
+
+    var prefix = isDojo ? "/" : root;
     var url = require.toUrl(prefix  + name + settings.ext);
 
     // Builds with r.js require Node.js to be installed.
@@ -65,11 +115,89 @@ define(function(require, exports) {
     // Wait for it to load.
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {
-        // Process as a Lo-Dash template and cache.
-        buildMap[name] = combyne(xhr.responseText);
+        var template = combyne(xhr.responseText);
 
-        // Return the compiled template.
-        load(buildMap[name]);
+        // Find all extend.
+        var extend = recurse(template.tree.nodes, function(node) {
+          return node.type === "ExtendExpression";
+        }).map(function(node) { return node.value; });
+
+        // Find all partials.
+        var partials = recurse(template.tree.nodes, function(node) {
+          return node.type === "PartialExpression" && !extendsCache[node.value];
+        }).map(function(node) { return node.value; });
+
+        // Find all filters.
+        var filters = recurse(template.tree.nodes, function(node) {
+          return node.filters && node.filters.length;
+        }).map(function(node) {
+          return node.filters.map(function(filter) {
+            return filter.value;
+          }).join(" ");
+        });
+
+        // Flatten the array.
+        if (filters.length) {
+          filters = filters.join(" ").split(" ");
+        }
+
+        // Map all filters to functions.
+        filters = filters.map(function(filterName) {
+          // Filters cannot be so easily inferred location-wise, so assume they are
+          // preconfigured or exist in a filters directory.
+          var filtersDir = settings.filtersDir || "filters";
+          var filtersPath = require.relative(name, filtersDir + '/' + filterName);
+
+          return require.load(filtersPath).then(function(filter) {
+            // Register the exported function.
+            template.registerFilter(filterName, filter);
+            return filter;
+          });
+        });
+
+        // Process as a Lo-Dash template and cache.
+        buildMap[name] = template;
+
+        // Wait for all filters, then partials, and finally extends to load and
+        // then pass back control.
+        Promise.all(filters).then(function(filters) {
+          // Map all partials to functions.
+          partials = partials.map(function(name) {
+            return new Promise(function(resolve, reject) {
+              // The last argument of this call is the noparse option that
+              // specifies the virtual partial should not be loaded.
+              require([name + '.html'], function(render) {
+                template.registerPartial(name, render);
+                resolve(render);
+              });
+            });
+          });
+
+          return Promise.all(partials);
+        }).then(function() {
+          // Map all extend to functions.
+          var list = extend.map(function(render) {
+            return new Promise(function(resolve, reject) {
+              var name = render.template;
+
+              // Pre-cache this template.
+              extendsCache[render.partial] = true;
+
+              // The last argument of this call is the noparse option that
+              // specifies the virtual partial should not be loaded.
+              require([name + '.html'], function(render) {
+                render.registerPartial(render.partial, template);
+                template.registerPartial(name, render);
+                resolve(render);
+              });
+            });
+          });
+
+          return Promise.all(list);
+        }).then(function() {
+          // Return the compiled template.
+          load(template);
+        });
       }
     };
 
@@ -114,7 +242,7 @@ define(function(require, exports) {
 
     settings.__proto__ = {
       ext: ".html",
-      root: config.baseUrl,
+      root: "/" + config.baseUrl,
       templateSettings: {}
     };
 
