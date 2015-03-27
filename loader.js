@@ -81,7 +81,7 @@ define(function(require, exports) {
                config.baseUrl.replace(/(\/$)/,'') ? settings.root:'';
 
     var prefix = isDojo ? "/" : root;
-    var url = require.toUrl(prefix  + name + settings.ext);
+    var url = require.toUrl(name + settings.ext);
 
     // Builds with r.js require Node.js to be installed.
     if (config.isBuild) {
