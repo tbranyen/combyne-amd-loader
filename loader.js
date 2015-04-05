@@ -166,7 +166,7 @@ define(function(require, exports) {
             return new Promise(function(resolve, reject) {
               // The last argument of this call is the noparse option that
               // specifies the virtual partial should not be loaded.
-              require([name + '.html'], function(render) {
+              require.load(name + '.html').then(function(render) {
                 template.registerPartial(name, render);
                 resolve(render);
               });
