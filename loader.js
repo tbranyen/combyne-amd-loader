@@ -37,6 +37,22 @@ function recurse(nodes, test) {
       }), test, memo));
     }
 
+    if (node.els) {
+      memo.push.apply(memo, recurse(node.els.nodes.map(function(node) {
+        if (node.type === "PartialExpression") {
+          memo = memo.concat(recurse([node], test));
+        }
+      }).filter(Boolean), test, memo));
+    }
+
+    if (node.elsif) {
+      memo.push.apply(memo, recurse(node.elsif.nodes.map(function(node) {
+        if (node.type === "PartialExpression") {
+          memo = memo.concat(recurse([node], test));
+        }
+      }).filter(Boolean), test, memo));
+    }
+
     memo.push.apply(memo, recurse(node.nodes, test, memo));
   });
 
@@ -146,9 +162,9 @@ define(function(require, exports) {
           // Filters cannot be so easily inferred location-wise, so assume they are
           // preconfigured or exist in a filters directory.
           var filtersDir = settings.filtersDir || "filters";
-          var filtersPath = require.relative(name, filtersDir + '/' + filterName);
+          var filtersPath = root + filtersDir + '/' + filterName;
 
-          return require.load(filtersPath).then(function(filter) {
+          return require.load(filtersPath, true).then(function(filter) {
             // Register the exported function.
             template.registerFilter(filterName, filter);
             return filter;
@@ -166,7 +182,7 @@ define(function(require, exports) {
             return new Promise(function(resolve, reject) {
               // The last argument of this call is the noparse option that
               // specifies the virtual partial should not be loaded.
-              require.load(name + '.html').then(function(render) {
+              require.load(root + name + '.html').then(function(render) {
                 template.registerPartial(name, render);
                 resolve(render);
               });
@@ -185,7 +201,7 @@ define(function(require, exports) {
 
               // The last argument of this call is the noparse option that
               // specifies the virtual partial should not be loaded.
-              require([name + '.html'], function(render) {
+              require.load(root + name + '.html').then(function(render) {
                 render.registerPartial(render.partial, template);
                 template.registerPartial(name, render);
                 resolve(render);
