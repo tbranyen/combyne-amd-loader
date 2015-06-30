@@ -10,7 +10,6 @@ var extendsCache = {};
 /**
  * Recursively traverses nodes returning those passing the truth function.
  *
- * @private
  * @param {Array} nodes
  * @param {Function} test
  * @returns {Array} An array of nodes.
@@ -201,10 +200,10 @@ define(function(require, exports) {
 
               // The last argument of this call is the noparse option that
               // specifies the virtual partial should not be loaded.
-              require.load(root + name + '.html').then(function(render) {
-                render.registerPartial(render.partial, template);
-                template.registerPartial(name, render);
-                resolve(render);
+              require.load(root + name + '.html').then(function(tmpl) {
+                tmpl.registerPartial(render.partial, template);
+                template.registerPartial(name, tmpl);
+                resolve(tmpl);
               });
             });
           });
