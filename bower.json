@@ -1,6 +1,6 @@
 {
   "name": "combyne-amd-loader",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "main": "loader.js",
   "dependencies": {
     "combyne": "~0.8.1"

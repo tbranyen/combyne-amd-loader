@@ -229,6 +229,10 @@ XHR is used, tests must be run from a server.
 
 ### Release notes. ###
 
+#### 1.0.0: ####
+
+* Everything is working woot!
+
 #### 0.1.1: ####
 
 * Fixed NPM dependencies, removed bower requirement

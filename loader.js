@@ -1,4 +1,4 @@
-/* Combyne AMD Loader v0.1.1
+/* Combyne AMD Loader v1.0.0
  * Copyright 2015, Tim Branyen (@tbranyen).
  * loader.js may be freely distributed under the MIT license.
  */
@@ -23,7 +23,7 @@ define(function(require, exports) {
   var combyne = require('combyne');
   var recurse = require('./node_modules/visit-combyne/index');
 
-  exports.version = '0.1.1';
+  exports.version = '1.0.0';
 
   // Invoked by the AMD builder, passed the path to resolve, the require
   // function, done callback, and the configuration options.
