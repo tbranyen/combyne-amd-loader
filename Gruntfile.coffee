@@ -16,7 +16,7 @@ module.exports = ->
 
     watch:
       files: ["loader.js", "test/**/*", "Gruntfile.coffee"]
-      tasks: ["clear", "default"]
+      tasks: ["default"]
 
     qunit:
       test:
@@ -43,14 +43,13 @@ module.exports = ->
           }]
 
           paths:
-            combyne: "../../node_modules/combyne/dist/combyne"
+            combyne: "../../node_modules/combyne/dist/combyne.legacy"
 
   @loadNpmTasks "grunt-contrib-jshint"
   @loadNpmTasks "grunt-contrib-watch"
   @loadNpmTasks "grunt-contrib-connect"
   @loadNpmTasks "grunt-contrib-qunit"
   @loadNpmTasks "grunt-contrib-clean"
-  @loadNpmTasks "grunt-clear"
 
   @loadNpmTasks "grunt-contrib-requirejs"
 

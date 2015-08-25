@@ -15,7 +15,7 @@ require({
   }],
 
   paths: {
-    "combyne": "../node_modules/combyne/dist/combyne",
+    "combyne": "../node_modules/combyne/dist/combyne.legacy",
     "nested": "fixtures/nested"
   }
 });
