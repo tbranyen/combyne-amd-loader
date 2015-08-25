@@ -1,74 +1,29 @@
 /* Combyne AMD Loader v0.1.1
- * Copyright 2013, Tim Branyen (@tbranyen).
+ * Copyright 2015, Tim Branyen (@tbranyen).
  * loader.js may be freely distributed under the MIT license.
  */
 (function(global) {
-"use strict";
+'use strict';
 
 var extendsCache = {};
-
-/**
- * Recursively traverses nodes returning those passing the truth function.
- *
- * @param {Array} nodes
- * @param {Function} test
- * @returns {Array} An array of nodes.
- */
-function recurse(nodes, test) {
-  var memo = [];
-
-  if (!nodes) {
-    return memo;
-  }
-
-  nodes.forEach(function(node) {
-    if (!node) {
-      return;
-    }
-
-    if (test(node)) {
-      memo.push(node);
-    }
-
-    if (node.conditions) {
-      memo.push.apply(memo, recurse(node.conditions.map(function(node) {
-        return node.value;
-      }), test, memo));
-    }
-
-    if (node.els) {
-      memo.push.apply(memo, recurse(node.els.nodes.map(function(node) {
-        if (node.type === "PartialExpression") {
-          memo = memo.concat(recurse([node], test));
-        }
-      }).filter(Boolean), test, memo));
-    }
-
-    if (node.elsif) {
-      memo.push.apply(memo, recurse(node.elsif.nodes.map(function(node) {
-        if (node.type === "PartialExpression") {
-          memo = memo.concat(recurse([node], test));
-        }
-      }).filter(Boolean), test, memo));
-    }
-
-    memo.push.apply(memo, recurse(node.nodes, test, memo));
-  });
-
-  return memo;
-}
 
 // Cache used to map configuration options between load and write.
 var buildMap = {};
 
 // Alias the correct `nodeRequire` method.
-var nodeRequire = typeof requirejs === "function" && requirejs.nodeRequire;
+var nodeRequire = typeof requirejs === 'function' && requirejs.nodeRequire;
+
+// Strips trailing `/` from url fragments.
+var stripTrailing = function(prop) {
+  return prop.replace(/(\/$)/, '');
+};
 
 // Define the plugin using the CommonJS syntax.
 define(function(require, exports) {
-  var combyne = require("combyne");
+  var combyne = require('combyne');
+  var recurse = require('./node_modules/visit-combyne/index');
 
-  exports.version = "0.1.1";
+  exports.version = '0.1.1';
 
   // Invoked by the AMD builder, passed the path to resolve, the require
   // function, done callback, and the configuration options.
@@ -83,25 +38,28 @@ define(function(require, exports) {
       isDojo = true;
     }
 
-    var contents = "";
+    var contents = '';
     var settings = configure(config);
 
     // Mimic how the actual Combyne stores.
     settings._filters = {};
     settings._partials = {};
 
-    // Only use root if baseUrl and root differ: toUrl() will choke on
-    // virtual path config
-    var root = settings.root.replace(/(\/$)/,'') !==
-               config.baseUrl.replace(/(\/$)/,'') ? settings.root:'';
+    // If the baseUrl and root are the same, just null out the root.
+    if (stripTrailing(config.baseUrl) === stripTrailing(settings.root)) {
+      settings.root = '';
+    }
 
-    var prefix = isDojo ? "/" : root;
-    var url = require.toUrl(name + settings.ext);
+    var url = require.toUrl(settings.root + name + settings.ext);
+
+    if (isDojo && url.indexOf(config.baseUrl) !== 0) {
+      url = stripTrailing(config.baseUrl) + url;
+    }
 
     // Builds with r.js require Node.js to be installed.
     if (config.isBuild) {
       // If in Node, get access to the filesystem.
-      var fs = nodeRequire("fs");
+      var fs = nodeRequire('fs');
 
       try {
         // First try reading the filepath as-is.
@@ -109,7 +67,7 @@ define(function(require, exports) {
       } catch(ex) {
         // If it failed, it's most likely because of a leading `/` and not an
         // absolute path.  Remove the leading slash and try again.
-        if (url[0] === "/") {
+        if (url[0] === '/') {
           url = url.slice(1);
         }
 
@@ -134,12 +92,12 @@ define(function(require, exports) {
 
         // Find all extend.
         var extend = recurse(template.tree.nodes, function(node) {
-          return node.type === "ExtendExpression";
+          return node.type === 'ExtendExpression';
         }).map(function(node) { return node.value; });
 
         // Find all partials.
         var partials = recurse(template.tree.nodes, function(node) {
-          return node.type === "PartialExpression" && !extendsCache[node.value];
+          return node.type === 'PartialExpression' && !extendsCache[node.value];
         }).map(function(node) { return node.value; });
 
         // Find all filters.
@@ -148,25 +106,27 @@ define(function(require, exports) {
         }).map(function(node) {
           return node.filters.map(function(filter) {
             return filter.value;
-          }).join(" ");
+          }).join(' ');
         });
 
         // Flatten the array.
         if (filters.length) {
-          filters = filters.join(" ").split(" ");
+          filters = filters.join(' ').split(' ');
         }
 
         // Map all filters to functions.
         filters = filters.map(function(filterName) {
           // Filters cannot be so easily inferred location-wise, so assume they are
           // preconfigured or exist in a filters directory.
-          var filtersDir = settings.filtersDir || "filters";
+          var filtersDir = settings.filtersDir || 'filters';
           var filtersPath = root + filtersDir + '/' + filterName;
 
-          return require.load(filtersPath, true).then(function(filter) {
-            // Register the exported function.
-            template.registerFilter(filterName, filter);
-            return filter;
+          return new Promise(function(resolve) {
+            require([filtersPath + '.js'], function(filter) {
+              // Register the exported function.
+              template.registerFilter(filterName, filter);
+              resolve(filter);
+            });
           });
         });
 
@@ -181,7 +141,7 @@ define(function(require, exports) {
             return new Promise(function(resolve, reject) {
               // The last argument of this call is the noparse option that
               // specifies the virtual partial should not be loaded.
-              require.load(root + name + '.html').then(function(render) {
+              require([root + name + '.html'], function(render) {
                 template.registerPartial(name, render);
                 resolve(render);
               });
@@ -200,7 +160,7 @@ define(function(require, exports) {
 
               // The last argument of this call is the noparse option that
               // specifies the virtual partial should not be loaded.
-              require.load(root + name + '.html').then(function(tmpl) {
+              require([root + name + '.html'], function(tmpl) {
                 tmpl.registerPartial(render.partial, template);
                 template.registerPartial(name, tmpl);
                 resolve(tmpl);
@@ -217,7 +177,7 @@ define(function(require, exports) {
     };
 
     // Initiate the fetch.
-    xhr.open("GET", url, true);
+    xhr.open('GET', url, true);
     xhr.send(null);
   };
 
@@ -247,8 +207,8 @@ define(function(require, exports) {
   // Crafts the written definition form of the module during a build.
   function strDefine(pluginName, moduleName, template) {
     return [
-      "define('", pluginName, "!", moduleName, "', ", template, ");\n"
-    ].join("");
+      'define(\'', pluginName, '!', moduleName, '\', ', template, ');\n'
+    ].join('');
   }
 
   function configure(config) {
@@ -256,16 +216,16 @@ define(function(require, exports) {
     var settings = config.combyneLoader || {};
 
     settings.__proto__ = {
-      ext: ".html",
-      root: "/" + config.baseUrl,
+      ext: '.html',
+      root: config.baseUrl,
       templateSettings: {}
     };
 
     // Ensure the root has been properly configured with a trailing slash,
     // unless it's an empty string or undefined, in which case work off the
     // baseUrl.
-    if (settings.root && settings.root[settings.root.length-1] !== "/") {
-      settings.root += "/";
+    if (settings.root && settings.root[settings.root.length-1] !== '/') {
+      settings.root += '/';
     }
 
     // Mix in the passed options into the Combyne template settings.
@@ -281,4 +241,4 @@ define(function(require, exports) {
   }
 });
 
-})(typeof global === "object" ? global : this);
+})(typeof global === 'object' ? global : this);

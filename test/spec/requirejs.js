@@ -8,9 +8,14 @@ QUnit.module("requirejs");
 require.config({
   baseUrl: "/test",
 
+  packages: [{
+    name: "tmpl",
+    main: "loader",
+    location: ".."
+  }],
+
   paths: {
-    combyne: "../node_modules/combyne/dist/combyne",
-    tmpl: "../loader"
+    combyne: "../node_modules/combyne/dist/combyne.legacy",
   }
 });
 
@@ -68,7 +73,7 @@ asyncTest("plugin works with r.js optimizer", 1, function() {
         return val.toUpperCase();
       });
 
-      equal(template.render().trim(), "HELLOWORLD!");
+      equal(template.render().trim(), "HELLO WORLD!");
 
       start();
     });

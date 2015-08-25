@@ -1,4 +1,4 @@
-/* 
+/*
  * Test Module: Curl
  * Ensures that the loader loads and functions in Curl.
  *
@@ -9,9 +9,14 @@ QUnit.module("curl");
 curl.config({
   baseUrl: "/test",
 
+  packages: [{
+    name: "tmpl",
+    main: "loader",
+    location: ".."
+  }],
+
   paths: {
-    "combyne": "../bower_components/combyne/dist/combyne",
-    "tmpl": "../loader",
+    "combyne": "../node_modules/combyne/dist/combyne.legacy",
     "nested": "fixtures/nested"
   }
 });
