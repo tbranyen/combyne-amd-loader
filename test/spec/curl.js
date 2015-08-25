@@ -3,7 +3,7 @@
  * Ensures that the loader loads and functions in Curl.
  *
  */
- /*global QUnit asyncTest curl ok start */
+ /*global QUnit curl */
 QUnit.module("curl");
 
 curl.config({
@@ -21,39 +21,45 @@ curl.config({
   }
 });
 
-asyncTest("AMD support", 1, function() {
+QUnit.test("AMD support", function(t) {
+  var done = t.async();
+  t.expect(1);
   curl(["tmpl!fixtures/template"]).then(
     function(template) {
-      equal(template.render().trim(), "It works!");
+      t.equal(template.render().trim(), "It works!");
 
-      start();
+      done();
     },
     function(ex) {
-      ok(false, ex.message);
-      start();
+      t.ok(false, ex.message);
+      done();
     }
   );
 });
 
-asyncTest("change extension", function() {
+QUnit.test("change extension", function(t) {
+  var done = t.async();
+  t.expect(1);
   curl({
     combyneLoader: {
       ext: ".ext"
     }
   }, ["tmpl!fixtures/different"]).then(
     function(template) {
-      equal(template.render().trim(), "It works!");
+      t.equal(template.render().trim(), "It works!");
 
-      start();
+      done();
     },
     function(ex) {
-      ok(false, ex.message);
-      start();
+      t.ok(false, ex.message);
+      done();
     }
   );
 });
 
-asyncTest("templateSettings", function() {
+QUnit.test("templateSettings", function(t) {
+  var done = t.async();
+  t.expect(1);
   curl({
     combyneLoader: {
       templateSettings: {
@@ -65,29 +71,33 @@ asyncTest("templateSettings", function() {
     }
   }, ["tmpl!fixtures/interpolate"]).then(
     function(template) {
-      equal(template.render({ msg: "It works!" }).trim(), "It works!");
+      t.equal(template.render({ msg: "It works!" }).trim(), "It works!");
 
-      start();
+      done();
     },
     function(ex) {
-      ok(false, ex.message);
-      start();
+      t.ok(false, ex.message);
+      done();
     }
   );
 });
 
-asyncTest("relative paths", 1, function() {
+QUnit.test("relative paths", function(t) {
+  var done = t.async();
+  t.expect(1);
   curl(["fixtures/nested/module"], function(exports) {
-    equal(exports.template.render().trim(), "It works!");
+    t.equal(exports.template.render().trim(), "It works!");
 
-    start();
+    done();
   });
 });
 
-asyncTest("virtual paths defined via paths config", 1, function() {
+QUnit.test("virtual paths defined via paths config", function(t) {
+  var done = t.async();
+  t.expect(1);
   curl(["tmpl!nested/template"], function(template) {
-    equal(template.render().trim(), "It works!");
+    t.equal(template.render().trim(), "It works!");
 
-    start();
+    done();
   });
 });

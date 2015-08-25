@@ -20,27 +20,33 @@ require({
   }
 });
 
-asyncTest("AMD support", 1, function() {
+QUnit.test("AMD support", function(t) {
+  var done = t.async();
+  t.expect(1);
   require(["tmpl!fixtures/template"], function(template) {
-    equal(template.render().trim(), "It works!");
+    t.equal(template.render().trim(), "It works!");
 
-    start();
+    done();
   });
 });
 
-asyncTest("change extension", function() {
+QUnit.test("change extension", function(t) {
+  var done = t.async();
+  t.expect(1);
   require({
     combyneLoader: {
       ext: ".ext"
     }
   }, ["tmpl!fixtures/different"], function(template) {
-    equal(template.render().trim(), "It works!");
+    t.equal(template.render().trim(), "It works!");
 
-    start();
+    done();
   });
 });
 
-asyncTest("templateSettings", function() {
+QUnit.test("templateSettings", function(t) {
+  var done = t.async();
+  t.expect(1);
   require({
     combyneLoader: {
       templateSettings: {
@@ -51,28 +57,32 @@ asyncTest("templateSettings", function() {
       }
     }
   }, ["tmpl!fixtures/interpolate"], function(template) {
-    equal(template.render({ msg: "It works!" }).trim(), "It works!");
+    t.equal(template.render({ msg: "It works!" }).trim(), "It works!");
 
-    start();
+    done();
   });
 });
 
-asyncTest("relative paths", 1, function() {
+QUnit.test("relative paths", function(t) {
+  var done = t.async();
+  t.expect(1);
   require(["./fixtures/nested/module.js"], function(exports) {
-    equal(exports.template.render().trim(), "It works!");
+    t.equal(exports.template.render().trim(), "It works!");
 
-    start();
+    done();
   });
 });
 
-asyncTest("virtual paths defined via paths config", 1, function() {
+QUnit.test("virtual paths defined via paths config", function(t) {
+  var done = t.async();
+  t.expect(1);
   require({
     paths: {
       "nested": "fixtures/nested"
     }
   }, ["tmpl!nested/template"], function(template) {
-    equal(template.render().trim(), "It works!");
+    t.equal(template.render().trim(), "It works!");
 
-    start();
+    done();
   });
 });
