@@ -19,27 +19,36 @@ require.config({
   }
 });
 
-asyncTest("AMD support", 1, function() {
-  require(["tmpl!fixtures/template"], function(template) {
-    equal(template.render().trim(), "It works!");
+QUnit.test("AMD support", function(t) {
+  var done = t.async();
+  t.expect(1);
 
-    start();
+  require(["tmpl!fixtures/template"], function(template) {
+    t.equal(template.render().trim(), "It works!");
+
+    done();
   });
 });
 
-asyncTest("change extension", 1, function() {
+QUnit.test("change extension", function(t) {
+  var done = t.async();
+  t.expect(1);
+
   require({
     combyneLoader: {
       ext: ".ext"
     }
   }, ["tmpl!fixtures/different"], function(template) {
-    equal(template.render().trim(), "It works!");
+    t.equal(template.render().trim(), "It works!");
 
-    start();
+    done();
   });
 });
 
-asyncTest("templateSettings", 1, function() {
+QUnit.test("templateSettings", function(t) {
+  var done = t.async();
+  t.expect(1);
+
   require({
     combyneLoader: {
       templateSettings: {
@@ -50,21 +59,27 @@ asyncTest("templateSettings", 1, function() {
       }
     }
   }, ["tmpl!fixtures/interpolate"], function(template) {
-    equal(template.render({ msg: "It works!" }).trim(), "It works!");
+    t.equal(template.render({ msg: "It works!" }).trim(), "It works!");
 
-    start();
+    done();
   });
 });
 
-asyncTest("relative paths", 1, function() {
+QUnit.test("relative paths", function(t) {
+  var done = t.async();
+  t.expect(1);
+
   require(["fixtures/nested/module"], function(exports) {
-    equal(exports.template.render().trim(), "It works!");
+    t.equal(exports.template.render().trim(), "It works!");
 
-    start();
+    done();
   });
 });
 
-asyncTest("plugin works with r.js optimizer", 1, function() {
+QUnit.test("plugin works with r.js optimizer", function(t) {
+  var done = t.async();
+  t.expect(1);
+
   // Load the module containing the build.
   require(["build_tools/_output/r"], function() {
     // Request the template.
@@ -73,29 +88,35 @@ asyncTest("plugin works with r.js optimizer", 1, function() {
         return val.toUpperCase();
       });
 
-      equal(template.render().trim(), "HELLO WORLD!");
+      t.equal(template.render().trim(), "HELLO WORLD!");
 
-      start();
+      done();
     });
   });
 });
 
-asyncTest("plugin works with root set", 1, function() {
-  require({ root: "/test" }, ["fixtures/nested/module"], function(template) {
-    equal(template.template.render().trim(), "It works!");
+QUnit.test("plugin works with root set", function(t) {
+  var done = t.async();
+  t.expect(1);
 
-    start();
+  require({ root: "/test" }, ["fixtures/nested/module"], function(template) {
+    t.equal(template.template.render().trim(), "It works!");
+
+    done();
   });
 });
 
-asyncTest("virtual paths defined via paths config", 1, function() {
+QUnit.test("virtual paths defined via paths config", function(t) {
+  var done = t.async();
+  t.expect(1);
+
   require({
     paths: {
       "nested": "fixtures/nested"
     }
   }, ["tmpl!nested/template"], function(template) {
-    equal(template.render().trim(), "It works!");
+    t.equal(template.render().trim(), "It works!");
 
-    start();
+    done();
   });
 });
