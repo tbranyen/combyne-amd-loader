@@ -36,9 +36,14 @@ module.exports = ->
           optimize: "none"
           exclude: ["combyne", "tmpl"]
 
+          packages: [{
+            name: "tmpl"
+            main: "loader.js"
+            location: "../../"
+          }]
+
           paths:
-            combyne: "../../bower_components/combyne/dist/combyne"
-            tmpl: "../../loader"
+            combyne: "../../node_modules/combyne/dist/combyne"
 
   @loadNpmTasks "grunt-contrib-jshint"
   @loadNpmTasks "grunt-contrib-watch"

@@ -33,10 +33,12 @@ project.
 
 ``` javascript
 require.config({
-  paths: {
+  packages: [{
     // You can change the plugin name to be whatever you want, maybe tpl?
-    "tmpl": "path/to/combyne-amd-loader/loader"
-  }
+    name: "tmpl",
+    main: "loader",
+    location: "path/to/combyne-amd-loader"
+  }]
 });
 ```
 
@@ -156,9 +158,12 @@ Set up your configuration:
 
 ``` javascript
 require({
-  paths: {
-    "tmpl": "path/to/combyne-amd-loader/loader"
-  }
+  packages: [{
+    // You can change the plugin name to be whatever you want, maybe tpl?
+    name: "tmpl",
+    main: "loader",
+    location: "path/to/combyne-amd-loader"
+  }]
 });
 ```
 
@@ -178,9 +183,12 @@ Set up your configuration:
 
 ``` javascript
 curl.config({
-  paths: {
-    "tmpl": "path/to/combyne-amd-loader/loader"
-  }
+  packages: [{
+    // You can change the plugin name to be whatever you want, maybe tpl?
+    name: "tmpl",
+    main: "loader",
+    location: "path/to/combyne-amd-loader"
+  }]
 });
 ```
 
