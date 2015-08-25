@@ -20,10 +20,17 @@ duplicative act of compiling the templates before use in production.
 
 ### Installing. ###
 
-This plugin has been registered with Bower, install with:
+This plugin has been registered with NPM & Bower, install with:
 
 ``` bash
 bower install combyne-amd-loader
+```
+
+or
+
+
+``` bash
+npm install combyne-amd-loader
 ```
 
 Alternatively you can download the `loader.js` file and place anywhere in your
