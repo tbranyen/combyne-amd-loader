@@ -44,6 +44,7 @@ module.exports = ->
 
           paths:
             combyne: "../../node_modules/combyne/dist/combyne.legacy"
+            'visit-combyne': "../../node_modules/visit-combyne/index"
 
   @loadNpmTasks "grunt-contrib-jshint"
   @loadNpmTasks "grunt-contrib-watch"

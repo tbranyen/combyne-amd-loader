@@ -21,7 +21,7 @@ var stripTrailing = function(prop) {
 // Define the plugin using the CommonJS syntax.
 define(function(require, exports) {
   var combyne = require('combyne');
-  var recurse = require('./node_modules/visit-combyne/index');
+  var recurse = require('visit-combyne');
 
   exports.version = '1.0.0';
 

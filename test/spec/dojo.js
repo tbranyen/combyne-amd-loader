@@ -16,6 +16,7 @@ require({
 
   paths: {
     "combyne": "../node_modules/combyne/dist/combyne.legacy",
+    "visit-combyne": "../node_modules/visit-combyne/index",
     "nested": "fixtures/nested"
   }
 });
